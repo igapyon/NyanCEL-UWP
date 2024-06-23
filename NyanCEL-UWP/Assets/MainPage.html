@@ -1,0 +1,76 @@
+<html>
+<head>
+</head>
+<body>
+ 
+<h1>NyanCEL-UWP</h1>
+<p>NyanCEL-UWP は Excel ブック (.xlsx) のシート内容を SQL で検索できるようにするサーバーツールです。</p>
+
+<ul>
+    <li>- NyanCEL-UWP は UWP と C# で実装されています。</li>
+    <li>- Excel ブック (.xlsx) を与えることにより、各シートをテーブルに見立てて SQL で検索できるようにします。</li>
+    <li>- REST インタフェースを経由して SQL を実行して結果を取得します。</li>
+    <li>- MIT ライセンスのもとで公開されています。</li>
+    <li>- NyanCEL-UWP は NyanCEL プロジェクトの一部です。</li>
+</ul>
+
+<h2>Usage</h2>
+
+<ol>
+    <li>Excelブック（.xlsx）ファイルを与えます<br/>
+    - シート名をテーブル名として使用<br/>
+    - 1行目のセル値を項目名として使用<br/>
+    - 2行目のセル書式から項目データ型を導出</li>
+    <li>指定した Excel ブックの内容を SQLite データベースに読み込みます<br/>
+    - 2行目からデータを読み込み<br/>
+    - 読み込んだデータをメモリ上の SQLite にロード</li>
+    <li>RESTインターフェースからSELECT文を実行します。<br/>
+    - 与えられた SELECT 文でデータベースを検索<br/>
+    - SQLite の SQL 文法が利用可能<br/>
+    - GETおよびPOSTメソッドが利用可能です。(現状はGETのみ対応)<br/>
+    - (デフォルトの) ポート番号は28096です。</li>
+    <li>SELECT文の検索結果を返却します。<br/>
+    - 行データを繰り返して検索結果を返却<br/>
+    - 返却結果として、json, xml, xlsx 形式サポート</li>
+</ol>
+
+<h3>Example</h3>
+
+<p>
+    以下のように Web ブラウザで URL を指定することにより SQL文を実行させることができます。
+</p>
+<code>
+    http://IPADDRESS:28096/api?sql=SELECT%20*%20FROM%20sqlite_master
+</code>
+
+<h2>Running information</h2>
+
+<ul>
+    <li>REST server port : 28096</li>
+    <li>Version : ver 20240612a</li>
+    <li>License : MIT LICENSE</li>
+    <li>This application is released under MIT license.</li>
+</ul>
+
+<h2>制限</h2>
+
+<ul>
+    <li>- オンメモリRDBMSで動作するため、大量のデータを与えた場合に動作しない可能性があります。</li>
+    <li>- .xlsx ファイルにのみ対応します。</li>
+    <li>- UWPアプリの一般的な制約により、ループバックによるHTTP接続 (localhost指定) ができません。別のマシンからアクセスしてください。</li>
+</ul>
+
+<h2>工事中エリア</h2>
+
+<a href="#" id="link1">ここにアプリ終了ボタンを配置予定</a>
+
+<script>
+    document.getElementById("link1");
+    addEventListener("click", function (event){
+        event.preventDefault();
+        window.chrome.webview.postMessage("link1 clicked");
+    });
+</script>
+
+</body>
+</html>
