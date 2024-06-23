@@ -1,98 +1,127 @@
-# NyanCEL
+# NyanCEL-UWP
 
-NyanCEL is a library that allows you to query the contents of Excel workbooks (.xlsx) using SQL.
+NyanCEL-UWP is a server tool that enables SQL queries on the contents of Excel workbooks (.xlsx).
 
-- NyanCEL-cs is implemented in C#.
-- By providing an Excel workbook (.xlsx), each sheet is treated as a table that can be queried with SQL.
+- NyanCEL-UWP is implemented in UWP and C#.
+- By providing an Excel workbook (.xlsx), it allows you to query each sheet as a table using SQL.
+- Executes SQL queries and retrieves results via a REST interface.
 - It is released under the MIT license.
-- NyanCEL-cs is part of the NyanCEL project.
+- NyanCEL-UWP is part of the NyanCEL project.
 
 ## Relationship with the NyanQL Project
 
-- NyanCEL is a friend project of the Nyankuru project.
-- It is an independent project inspired by the Nyankuru project.
-- NyanCEL respects and honors the Nyankuru project.
+- NyanCEL is a friend project of the NyanQL project.
+- It is an independent project inspired by the NyanQL project.
+- NyanCEL respects and honors the NyanQL project.
+- It is implemented in UWP and C# and is planned to be distributed through the Microsoft Store.
 
 ## Workflow
 
-1. Provide an Excel workbook (.xlsx) file
-   - Use the sheet name as the table name
-   - Use the values in the first row as column names
-   - Derive column data types from the format of the second row
-2. Load the contents of the specified Excel workbook into an SQLite database
-   - Read data from the second row onward
-   - Load the read data into an in-memory SQLite database
-3. Execute a SELECT statement
-   - Query the database with the provided SELECT statement
-   - SQLite SQL syntax is available
-4. Return the results of the SELECT statement
-   - Return the search results row by row
-   - Default returns the search results as JSON data
-   - json, xml, xlsx are supported for search results
+1. Provide an Excel workbook (.xlsx) file:
+   - Use sheet names as table names.
+   - Use the values of the first row as column names.
+   - Derive column data types from the format of the second row.
+2. Load the content of the specified Excel workbook into an SQLite database:
+   - Read data from the second row onwards.
+   - Load the read data into an in-memory SQLite.
+3. Execute SELECT statements from the REST interface:
+   - Search the database with the provided SELECT statement.
+   - Use SQLite SQL syntax.
+   - GET and POST methods are available (currently only GET is supported).
+   - The default port number is 28096.
+4. Return the search results of the SELECT statement:
+   - Return search results as row data.
+   - Support for json, xml, xlsx formats as return results.
+   - By default, return search results as json data.
+   - Add the parameter fmt=xml to change the return format to XML.
+   - Add the parameter fmt=xlsx to change the return format to xlsx.
+   - Specify the parameter fmt=json&target=data.1 to filter and specify return data.
+   - Apply jsonpath to the search results with fmt=json&jsonpath=.
+   - Apply xpath to the search results with fmt=xml&xpath=.
 
-## Usage
-
-```cs
-  using (var connection = await NyanCELUtil.CreateXlsxDatabase())
-  {
-    var memoryStream = await NyanCELUtil.ReadBinaryFile2MemoryStream("./TestData/Book1.xlsx");
-    List<NyanTableInfo> tableInfoList = await NyanXlsx2Sqlite.LoadExcelFile(
-      connection, memoryStream);
-    string resultString = await NyanSql2Json.Sql2Json(connection, "SELECT * FROM sqlite_master");
-  }
-```
+As a feature of UWP, only access to the desktop and removable disks is set.
 
 ## Internally Used OSS
 
-The following OSS is used internally. Thanks to the providers of each OSS.
+NyanCEL-UWP uses the following OSS internally. We appreciate the providers of each OSS.
 
 - ClosedXML
   - MIT
-  - Version 0.102.2
+  - 0.102.2
+- EmbedIO
+  - MIT
+  - 3.5.2
 - Microsoft.Data.Sqlite
   - MIT
-  - Version 8.0.6
+  - 8.0.6
+- Microsoft.UI.Xaml
+  - 2.8.6
 - Newtonsoft.Json
   - MIT
-  - Version 13.0.3
+  - 13.0.3
+- Serilog
+  - MIT
+  - 4.0.0
+- Serilog.Sinks.File
+  - MIT
+  - 5.0.0
+- Igapyon.NyanCEL
+  - MIT
+  - 0.5.0
 
-## Limitations
+## Path of Operation Logs
 
-- It operates as an in-memory RDBMS, so it may not work with large amounts of data
-- Supports .xlsx files
-- Double quotes cannot be included in Excel sheet names or column names in the title row
+Operation logs of NyanCEL are stored in the following folder hierarchy:
 
-## Excel to SQLite Type Mapping
+```sh
+USERROOTPATH\AppData\Local\Packages\NyanCEL-XXXXXXXXXXXXX\LocalState
+```
 
-Internally, cell value types are derived from Excel formats to SQLite types.
+- Log files related to operation and executed SQL log files are created.
 
-| Excel Format | SQLite Type | Example |
-|--------------|-------------|---------|
-| 0            | TEXT        |         |
-| 1            | INTEGER     | 0       |
-| 2            | REAL        | 0.00    |
-| 3            | REAL        | #,##0   |
-| 4            | REAL        | #,##0.00|
-| 9            | REAL        | 0%      |
-| 10           | REAL        | 0.00%   |
-| 11           | TEXT        | 0.00E+00|
-| 12           | TEXT        | # ?/?   |
-| 13           | TEXT        | # ??/?? |
-| 14           | TEXT        | d/m/yyyy: Format yyyy-MM-dd |
-| 15           | TEXT        | d-mmm-yy: Format yyyy-MM-dd |
-| 16           | TEXT        | d-mmm: Format MM-dd |
-| 17           | TEXT        | mmm-yy: Format yyyy-MM |
-| 18           | TEXT        | h:mm tt |
-| 19           | TEXT        | h:mm:ss tt |
-| 20           | TEXT        | H:mm: Format HH:mm |
-| 21           | TEXT        | H:mm:ss: Format HH:mm:ss |
-| 22           | TEXT        | m/d/yyyy H:mm: Format yyyy-MM-dd HH:mm |
-| 37           | INTEGER     | #,##0;(#,##0) |
-| 38           | INTEGER     | #,##0;[Red](#,##0) |
-| 39           | REAL        | #,##0.00;(#,##0.00) |
-| 40           | REAL        | #,##0.00;[Red](#,##0.00) |
-| 45           | TEXT        | mm:ss: Format mm:ss |
-| 46           | TEXT        | [h]:mm:ss: Format HH:mm:ss |
-| 47           | TEXT        | mmss.0 |
-| 48           | TEXT        | ##0.0E+0 |
-| 49           | TEXT        |
+## SQL Useful for Operation Confirmation
+
+```sh
+http://IPADDRESS:28096/api?sql=SELECT%20*%20FROM%20sqlite_master
+```
+
+# Limitations
+
+- Since it operates on an in-memory RDBMS, it may not work with large amounts of data.
+- Only supports .xlsx files.
+- Cannot connect via HTTP loopback. Please access from another machine.
+- The app is basically intended to operate in the foreground.
+- Double quotes cannot be included in the Excel sheet names or column names of the title row.
+
+# Install
+
+- Prepare NyanCEL_1.0.1.0_x86_x64_arm_arm64.cer.
+- Use certlm.msc to open "Trusted Root Certification Authorities > Certificates".
+- Right-click > All Tasks > Import. Install the certificate (NyanCEL_1.0.1.0_x86_x64_arm_arm64.cer).
+- Double-click NyanCEL_1.0.1.0_x86_x64_arm_arm64.msixbundle to install.
+
+# TODO
+
+- (ASAP) Enable specifying BASIC authentication username and password at startup.
+- (ASAP) Function to operate with https using user-specified certificates.
+- Operation boundaries:
+  - Error handling. Handle failures in loading Excel workbooks (inputting non-Excel data). Verify errors for file loading from locations other than documents or removable disks.
+- Appearance:
+  - Update the app store images appropriately.
+  - Properly document the README.md.
+- Testing:
+  - Create test cases.
+  - Obtain an official code signing key.
+  - Verify operation in KIOSK mode.
+  - Publish a beta version on the store.
+  - Handle .xlsx files with columns of the same name.
+  - Handle .xlsx files containing NyanRowId.
+  - Handle .xlsx files with a null first row.
+- Future version features:
+  - Ensure some compatibility with NyanQL configuration files.
+  - Add an API (/dml) for injecting DML.
+  - Add an API (/exp) for exporting in-memory data.
+  - Port number change feature.
+  - URI scheme launch: Specify Excel workbook, port number, etc. as arguments.
+  - Enable or disable SQL log output.
+  - Support for CSV.
